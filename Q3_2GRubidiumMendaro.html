@@ -174,8 +174,14 @@
     </style>
 
     <script>
-        function confirmSubmit() {
-            return confirm("Are you sure you want to submit your club application? Please review all information before proceeding.");
+        function confirmSubmit(event) {
+            event.preventDefault();
+            
+            if (confirm("Are you sure you want to submit your club application? Please review all information before proceeding.")) {
+                saveSignup();
+                return false;
+            }
+            return false;
         }
 
         function confirmReset() {
@@ -189,11 +195,46 @@
                 element.classList.remove("error");
             }
         }
+
+        function saveSignup() {
+            // Get form data
+            const form = document.querySelector('form');
+            const formData = new FormData(form);
+            
+            // Create signup object
+            const signup = {
+                studentid: formData.get('studentid'),
+                fullname: formData.get('fullname'),
+                birthday: formData.get('birthday'),
+                email: formData.get('email'),
+                mobile: formData.get('mobile'),
+                grade: formData.get('grade'),
+                studenttype: formData.get('studenttype'),
+                club: formData.get('club'),
+                reason: formData.get('reason')
+            };
+            
+            // Get existing signups from localStorage
+            let signups = localStorage.getItem('clubSignups');
+            signups = signups ? JSON.parse(signups) : [];
+            
+            // Add new signup
+            signups.push(signup);
+            
+            // Save back to localStorage
+            localStorage.setItem('clubSignups', JSON.stringify(signups));
+            
+            // Show success message
+            alert('Your application has been submitted successfully!');
+            
+            // Reset form
+            form.reset();
+        }
     </script>
 </head>
 <body>
 
-<form method="post" action="submit" onsubmit="return confirmSubmit()" onreset="return confirmReset()">
+<form method="post" onsubmit="confirmSubmit(event)" onreset="return confirmReset()">
     
     <h1>Club & Organization Application Form</h1>
 
@@ -279,6 +320,7 @@
     <div class="buttons">
         <button type="submit">Submit Application</button>
         <button type="reset">Reset Form</button>
+        <button type="button" onclick="window.location.href='viewSignUps.html'" style="background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);">View Signups</button>
     </div>
 
 </form>

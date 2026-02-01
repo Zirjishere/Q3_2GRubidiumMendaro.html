@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Show List of Students Who Signed-Up</title>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .author {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .back-link {
+            display: inline-block;
+            color: #0066cc;
+            text-decoration: none;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .filter-section {
+            margin-bottom: 20px;
+        }
+
+        .filter-section label {
+            font-weight: bold;
+            margin-right: 10px;
+            font-size: 14px;
+        }
+
+        select {
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+            min-width: 200px;
+        }
+
+        .total-count {
+            margin: 15px 0;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th {
+            background-color: #003366;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            font-size: 14px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tr:hover {
+            background-color: #f0f0f0;
+        }
+
+        .no-signups {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-size: 16px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+
+        .highlight-row {
+            background-color: #003366 !important;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Show List of Students Who Signed-Up</h1>
+        <p class="author">by Zirjan Mendaro</p>
+        
+        <a href="Q3_2GRubidiumMendaro.html" class="back-link">Back to Signup</a>
+        
+        <div class="filter-section">
+            <label for="clubSelect">Select Your Club:</label>
+            <select id="clubSelect" onchange="filterSignups()">
+                <option value="">-- select an option --</option>
+            </select>
+        </div>
+        
+        <div class="total-count" id="totalCount">Total Signup: 0</div>
+        
+        <div id="tableContainer"></div>
+    </div>
+
+    <script>
+        // Club name mapping
+        const clubNames = {
+            'tech_club': 'Technology & Innovation Club',
+            'arts_society': 'Creative Arts Society',
+            'sports_council': 'Sports & Athletics Council',
+            'music_guild': 'Music & Performance Guild',
+            'science_circle': 'Science & Research Circle',
+            'debate_team': 'Debate & Public Speaking Team',
+            'volunteer_org': 'Community Volunteer Organization'
+        };
+
+        // Grade mapping
+        const gradeNames = {
+            'g7': 'Grade 7',
+            'g8': 'Grade 8',
+            'g9': 'Grade 9',
+            'g10': 'Grade 10',
+            'g11': 'Grade 11',
+            'g12': 'Grade 12'
+        };
+
+        // Student type mapping
+        const studentTypeNames = {
+            'INT': 'Intern',
+            'EXT': 'Extern'
+        };
+
+        // Load signups from localStorage
+        function loadSignups() {
+            const signups = localStorage.getItem('clubSignups');
+            return signups ? JSON.parse(signups) : [];
+        }
+
+        // Populate club dropdown
+        function populateClubDropdown() {
+            const signups = loadSignups();
+            const clubSelect = document.getElementById('clubSelect');
+            
+            // Get unique clubs from signups
+            const uniqueClubs = [...new Set(signups.map(signup => signup.club))];
+            
+            // Add options to dropdown
+            uniqueClubs.forEach(clubValue => {
+                const option = document.createElement('option');
+                option.value = clubValue;
+                option.textContent = clubNames[clubValue] || clubValue;
+                clubSelect.appendChild(option);
+            });
+        }
+
+        // Filter and display signups
+        function filterSignups() {
+            const selectedClub = document.getElementById('clubSelect').value;
+            const signups = loadSignups();
+            
+            let filteredSignups = signups;
+            
+            // Filter by selected club if one is selected
+            if (selectedClub) {
+                filteredSignups = signups.filter(signup => signup.club === selectedClub);
+            }
+            
+            // Update total count
+            document.getElementById('totalCount').textContent = `Total Signup: ${filteredSignups.length}`;
+            
+            // Display table
+            displayTable(filteredSignups);
+        }
+
+        // Display signups in table
+        function displayTable(signups) {
+            const tableContainer = document.getElementById('tableContainer');
+            
+            if (signups.length === 0) {
+                tableContainer.innerHTML = '<div class="no-signups">No Sign Ups for this club</div>';
+                return;
+            }
+            
+            let tableHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Club</th>
+                            <th>ID</th>
+                            <th>Fullname</th>
+                            <th>Grade</th>
+                            <th>Email</th>
+                            <th>Mobile</th>
+                            <th>Intern/Extern</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            signups.forEach(signup => {
+                tableHTML += `
+                    <tr>
+                        <td>${clubNames[signup.club] || signup.club}</td>
+                        <td>${signup.studentid}</td>
+                        <td>${signup.fullname}</td>
+                        <td>${gradeNames[signup.grade] || signup.grade}</td>
+                        <td>${signup.email}</td>
+                        <td>${signup.mobile}</td>
+                        <td>${studentTypeNames[signup.studenttype] || signup.studenttype}</td>
+                    </tr>
+                `;
+            });
+            
+            tableHTML += `
+                    </tbody>
+                </table>
+            `;
+            
+            tableContainer.innerHTML = tableHTML;
+        }
+
+        // Initialize page
+        window.onload = function() {
+            populateClubDropdown();
+            filterSignups(); // Display all signups initially
+        };
+    </script>
+</body>
+</html>
